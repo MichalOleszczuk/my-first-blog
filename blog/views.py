@@ -3,6 +3,7 @@ from .models import Post, Comment
 from django.utils import timezone
 from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
@@ -56,6 +57,7 @@ def post_remove(request, pk):
     post.delete()
     return redirect('post_list')
 
+@login_required
 def add_comment_to_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
@@ -81,3 +83,16 @@ def comment_remove(request, pk):
     post_pk = comment.post.pk
     comment.delete()
     return redirect('post_detail', pk=post_pk)
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            usr = form.save(commit=False)
+            usr.save()
+            return redirect('/')
+        else:
+            print(form.errors)
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html',  {'form': form})
