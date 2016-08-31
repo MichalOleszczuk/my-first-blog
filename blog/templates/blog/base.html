@@ -19,6 +19,9 @@
       <a href="{% url 'register' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
       {% endif %}
       <h1><a href="/">Django Girls Blog</a></h1>
+        <form id="searchform" action="{% url 'search' %}" method="get" accept-charset="utf-8">
+      <input class="searchfield" id="searchbox" name="q" type="text" placeholder="Search">
+    </form>
     </div>
     <div class="content container">
         <div class="row">

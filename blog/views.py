@@ -4,10 +4,14 @@ from django.utils import timezone
 from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.db.models import Q
+from django.views.generic.list import ListView
+
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
     return render(request, 'blog/post_list.html', {'posts': posts})
+
 
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
@@ -84,6 +88,7 @@ def comment_remove(request, pk):
     comment.delete()
     return redirect('post_detail', pk=post_pk)
 
+
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
@@ -96,3 +101,19 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html',  {'form': form})
+
+
+class Search(ListView):
+    model = Post
+    template_name = "blog/search_list.html"
+
+    def get_queryset(self):
+        result = super(Search, self).get_queryset()
+        query = self.request.GET.get('q')
+
+        if query:
+            result = result.filter(
+                Q(author__first_name__icontains=query) | Q(author__last_name__icontains=query) | Q(author__username__icontains=query) | Q(title__icontains=query)
+            )
+        print(result)
+        return result
